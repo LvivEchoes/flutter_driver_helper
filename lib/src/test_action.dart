@@ -4,37 +4,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 
+// ignore_for_file: public_member_api_docs
+
 typedef FutureOrWidgetTesterCallback = FutureOr<void> Function(WidgetTester);
 
 @immutable
 class TestAction {
+  TestAction(this.action, {this.name, this.settle = false, this.debugFunction});
+
   final FutureOrWidgetTesterCallback action;
   final String? name;
   final bool settle;
 
   final FutureOrWidgetTesterCallback? debugFunction;
-
-  TestAction(this.action, {this.name, this.settle = false, this.debugFunction});
 }
 
 class TesterActions {
   static TestAction pumpAndSettle() =>
       TestAction((tester) => tester.pumpAndSettle(), name: 'pumpAndSettle');
 
-  static TestAction idle(int millis) =>
-      TestAction(
-            (_) => Future.delayed(Duration(milliseconds: millis)),
-        name: "idle $millis millis",
+  static TestAction idle(int millis) => TestAction(
+        (_) => Future.delayed(Duration(milliseconds: millis)),
+        name: 'idle $millis millis',
       );
 
-  static TestAction screenshot(String filename, Type app) =>
-      TestAction(
-            (tester) =>
-            expectLater(find.byType(app), matchesGoldenFile(filename)),
+  static TestAction screenshot(String filename, Type app) => TestAction(
+        (tester) => expectLater(find.byType(app), matchesGoldenFile(filename)),
         name: 'screenshot test on $filename',
       );
 }
 
+// ignore_for_file: lines_longer_than_80_chars
 /*
 WidgetTester.idle() - app goes idle
 

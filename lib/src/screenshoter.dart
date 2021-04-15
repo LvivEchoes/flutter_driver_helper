@@ -4,6 +4,8 @@ import 'dart:io';
 
 import 'test_action.dart';
 
+// ignore_for_file: public_member_api_docs
+
 /// Utility class for making screenshots during integrations tests.
 ///
 /// Screenshots are saved to dir "baseScreensDir/${current date-time}/".
@@ -12,29 +14,31 @@ import 'test_action.dart';
 ///
 /// May be disabled with corresponding constructor param.
 class Screenshoter {
+  Screenshoter(
+    this._driver,
+    String baseScreensDir, {
+    this.enabled = true,
+    this.withIndices = true,
+  }) : _screensDir = '$baseScreensDir/${DateTime.now()}' {
+    if (!enabled) return;
+    Directory(_screensDir).createSync(recursive: true);
+  }
+
+  // ignore: unused_field
   final dynamic _driver;
   final String _screensDir;
   final bool enabled;
   final bool withIndices;
   int _nextScreenId = 1;
 
-  Screenshoter(
-    this._driver,
-    String baseScreensDir, {
-    this.enabled: true,
-    this.withIndices: true,
-  }) : _screensDir = "$baseScreensDir/${DateTime.now()}" {
-    if (!enabled) return;
-    Directory(_screensDir).createSync(recursive: true);
-  }
-
   Future<void> saveScreen(String name) async {
     if (!enabled) return;
-    final namePrefix = withIndices ? "${_nextScreenId++}_" : "";
-    final path = "$_screensDir/$namePrefix$name.png";
+    final namePrefix = withIndices ? '${_nextScreenId++}_' : '';
+    // ignore: unused_local_variable
+    final path = '$_screensDir/$namePrefix$name.png';
     // _driver.takeScreenshot(path);
   }
 
   TestAction screenshot(String name) =>
-      TestAction((_) => saveScreen(name), name: "take screenshot $name");
+      TestAction((_) => saveScreen(name), name: 'take screenshot $name');
 }
