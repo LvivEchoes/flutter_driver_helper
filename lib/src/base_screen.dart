@@ -1,8 +1,11 @@
-import 'package:flutter_driver/flutter_driver.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
-import 'package:test/test.dart';
 
 import 'test_action.dart';
+import 'test_widget.dart';
+
+// ignore_for_file: deprecated_member_use_from_same_package
 
 /// Base page-object for accessing UI-elements.
 /// (https://martinfowler.com/bliki/PageObject.html).
@@ -12,124 +15,58 @@ import 'test_action.dart';
 /// See README.md for example.
 @immutable
 abstract class BaseScreen {
-  final FlutterDriver _driver;
-
-  BaseScreen(this._driver);
-
   @protected
-  DWidget dWidget(dynamic key) => DWidget(_driver, key);
+  DWidget dWidget(dynamic key) => DWidget(key);
 
   @protected
   DWidget dScrollItem(dynamic key, DWidget scrollable) =>
-      DScrollItem(_driver, key, scrollable);
+      DScrollItem(key, scrollable);
 
-  DWidget get pageBack => DWidget.pageBack(_driver);
+  DWidget get pageBack => DWidget.pageBack();
 }
 
 /// [DWidget] represents single UI-element in Screen.
 /// It has methods for interacting with given UI-element during testing.
 /// These methods return [TestAction] for using in [runTestActions].
 @immutable
+@deprecated
 class DWidget {
-  final FlutterDriver _driver;
-  final String _name;
-  final SerializableFinder _finder;
+  final TestWidget tw;
 
-  DWidget(this._driver, dynamic valueKey)
-      : _name = valueKey.toString(),
-        _finder = find.byValueKey(valueKey);
+  DWidget(dynamic valueKey): tw = TestWidget(valueKey);
 
-  DWidget.pageBack(this._driver)
-      : _name = "pageBack",
-        _finder = find.pageBack();
+  DWidget.pageBack(): tw = TestWidget.pageBack();
 
-  TestAction tap({Duration timeout}) => TestAction(
-        () => _driver.tap(_finder, timeout: timeout),
-        name: "tap on $_name",
-      );
+  TestAction tap({Duration? timeout}) => tw.tap();
 
-  TestAction waitFor({Duration timeout}) => TestAction(
-        () => _driver.waitFor(_finder, timeout: timeout),
-        name: "waitFor $_name",
-      );
+  TestAction waitFor({Duration? timeout}) => tw.waitFor(timeout: timeout);
 
-  TestAction waitForAbsent({Duration timeout}) => TestAction(
-        () => _driver.waitForAbsent(_finder, timeout: timeout),
-        name: "waitForAbsent $_name",
-      );
+  TestAction waitForAbsent({Duration? timeout}) => tw.waitForAbsent(timeout: timeout);
 
-  TestAction hasText(String text, {Duration timeout}) => TestAction(
-        () async =>
-            expect(await _driver.getText(_finder, timeout: timeout), text),
-        name: "check $_name hasText $text",
-      );
+  TestAction hasText(String text, {Duration? timeout}) => tw.hasText(text);
 
-  TestAction textEndsWith(String s, {Duration timeout}) => TestAction(
-        () async {
-          final actualText = await getText(timeout: timeout);
-          print("check text ends with actualText=$actualText");
-          expect(actualText.endsWith(s), true);
-        },
-        name: "check text ends with $_name $s",
-      );
+  TestAction textEndsWith(String s, {Duration? timeout}) => tw.textEndsWith(s);
 
-  TestAction textStartsWith(String s, {Duration timeout}) => TestAction(
-        () async {
-          final actualText = await getText(timeout: timeout);
-          print("check text starts with actualText=$actualText");
-          expect(actualText.startsWith(s), true);
-        },
-        name: "check text starts with $_name $s",
-      );
+  TestAction textStartsWith(String s, {Duration? timeout}) => tw.textStartsWith(s);
 
-  TestAction textContains(String s, {Duration timeout}) => TestAction(
-        () async {
-          final actualText = await getText(timeout: timeout);
-          print("check text contains with actualText=$actualText");
-          expect(actualText.contains(s), true);
-        },
-        name: "check text contains with $_name $s",
-      );
+  TestAction textContains(String s, {Duration? timeout}) => tw.textContains(s);
 
-  TestAction setText(String text, {Duration timeout}) => TestAction(
-        () async {
-          await _driver.tap(_finder, timeout: timeout);
-          await _driver.enterText(text ?? "", timeout: timeout);
-        },
-        name: "setText $text on $_name",
-      );
+  TestAction setText(String text, {Duration? timeout}) => tw.setText(text);
 
-  TestAction appendText(String text, {Duration timeout}) => TestAction(
-        () async {
-          await _driver.tap(_finder, timeout: timeout);
-          final prev = await _driver.getText(_finder, timeout: timeout);
-          await _driver.enterText(prev + (text ?? ""), timeout: timeout);
-        },
-        name: "appendText $text on $_name",
-      );
+  TestAction appendText(String text, {Duration? timeout}) => tw.appendText(text);
 
-  TestAction scrollIntoView({double alignment = 0.0, Duration timeout}) =>
-      TestAction(
-        () => _driver.scrollIntoView(_finder,
-            alignment: alignment, timeout: timeout),
-        name: "scrollIntoView $_name $alignment",
-      );
+  TestAction scrollIntoView({double alignment = 0.0, Duration? timeout}) =>
+      tw.scrollIntoView();
 
   TestAction scroll({
     double dx = 0,
     double dy = 0,
     Duration duration = const Duration(milliseconds: 300),
     int frequency = 60,
-    Duration timeout,
-  }) =>
-      TestAction(
-        () => _driver.scroll(_finder, dx, dy, duration,
-            frequency: frequency, timeout: timeout),
-        name: "scroll $_name dx=$dx dy=$dy",
-      );
+    Duration? timeout,
+  }) => tw.scroll(dx: dx, dy: dy, duration: duration, frequency: frequency);
 
-  Future<String> getText({Duration timeout}) =>
-      _driver.getText(_finder, timeout: timeout);
+  Future<String> getText({Duration? timeout}) => Future.value("DEPRECATED");
 }
 
 /// [DScrollItem] represents item in scrollable widget.
@@ -140,26 +77,14 @@ class DScrollItem extends DWidget {
   final DWidget _scrollable;
 
   DScrollItem(
-    FlutterDriver driver,
     dynamic valueKey,
     this._scrollable,
-  ) : super(driver, valueKey);
+  ) : super(valueKey);
 
   TestAction scrollUntilVisible({
     double alignment = 0.0,
     double dxScroll = 0.0,
     double dyScroll = 0.0,
-    Duration timeout,
-  }) =>
-      TestAction(
-        () => _driver.scrollUntilVisible(
-          _scrollable._finder,
-          _finder,
-          alignment: alignment,
-          dxScroll: dxScroll,
-          dyScroll: dyScroll,
-          timeout: timeout,
-        ),
-        name: "scrollUntilVisible ${_scrollable._name} $_name",
-      );
+    Duration? timeout,
+  }) => tw.dragUntilVisible(_scrollable.tw.finder, Offset(dxScroll, dyScroll));
 }
