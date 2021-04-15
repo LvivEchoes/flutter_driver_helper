@@ -4,64 +4,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 
-
-typedef MainFunction = void Function();
+typedef FutureOrWidgetTesterCallback = FutureOr<void> Function(WidgetTester);
 
 @immutable
 class TestAction {
-  final FutureOr<void> Function(WidgetTester) action;
+  final FutureOrWidgetTesterCallback action;
   final String? name;
   final bool settle;
 
-  TestAction(this.action, {this.name, this.settle = false});
+  final FutureOrWidgetTesterCallback? debugFunction;
 
-  /// Run list of [actions] sequentially,
-  /// awaiting for each action to compete before starting next action.
-  static Future<void> runSequential(WidgetTester tester, MainFunction main,
-      Iterable<TestAction> actions) async {
-
-    print('Start app');
-    main();
-    await tester.pumpAndSettle();
-
-    for (final testAction in actions) {
-      if (testAction.name != null) {
-        print("Running ${testAction.name}");
-      }
-      try {
-        await testAction.action(tester);
-      } catch (tf) {
-        await idle(5000).action(tester);
-        rethrow;
-      }
-      if(testAction.settle) {
-        await tester.pumpAndSettle();
-      }
-    }
-  }
+  TestAction(this.action, {this.name, this.settle = false, this.debugFunction});
 }
 
-class TestActions {
-  final Iterable<TestAction> actions;
+class TesterActions {
+  static TestAction pumpAndSettle() =>
+      TestAction((tester) => tester.pumpAndSettle(), name: 'pumpAndSettle');
 
-  TestActions(this.actions);
+  static TestAction idle(int millis) =>
+      TestAction(
+            (_) => Future.delayed(Duration(milliseconds: millis)),
+        name: "idle $millis millis",
+      );
 
-
+  static TestAction screenshot(String filename, Type app) =>
+      TestAction(
+            (tester) =>
+            expectLater(find.byType(app), matchesGoldenFile(filename)),
+        name: 'screenshot test on $filename',
+      );
 }
-
-TestAction pumpAndSettle() => TestAction((tester) => tester.pumpAndSettle(), name: 'pumpAndSettle');
-
-TestAction idle(int millis) => TestAction(
-      (_) => Future.delayed(Duration(milliseconds: millis)),
-      name: "idle $millis millis",
-    );
-
-TestAction screenshot(String filename, Type app) => TestAction(
-    (tester) => expectLater(find.byType(app), matchesGoldenFile(filename)),
-  name: 'screenshot test on $filename',
-);
-
-TestAction screenshoterScreenshot(String filename, Type app) => screenshot(filename, app);
 
 /*
 WidgetTester.idle() - app goes idle
