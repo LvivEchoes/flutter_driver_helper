@@ -13,6 +13,7 @@ import 'test_widget.dart';
 /// [pageBack] is AppBar's back button in Scaffold.
 ///
 /// See README.md for example.
+@deprecated
 @immutable
 abstract class BaseScreen {
   @protected

@@ -1,4 +1,4 @@
-import 'package:flutter_driver_helper/flutter_driver_helper.dart';
+import 'package:flutter_driver_helper/flutter_driver_helper_legacy.dart';
 
 class MainScreen extends BaseScreen {
   DWidget get app => dWidget('app');
