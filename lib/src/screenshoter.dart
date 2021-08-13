@@ -1,8 +1,10 @@
 import 'dart:io';
 
-import 'package:flutter_driver/flutter_driver.dart';
+// import 'package:integration_test/integration_test.dart';
 
 import 'test_action.dart';
+
+// ignore_for_file: public_member_api_docs
 
 /// Utility class for making screenshots during integrations tests.
 ///
@@ -12,30 +14,31 @@ import 'test_action.dart';
 ///
 /// May be disabled with corresponding constructor param.
 class Screenshoter {
-  final FlutterDriver _driver;
+  Screenshoter(
+    this._driver,
+    String baseScreensDir, {
+    this.enabled = true,
+    this.withIndices = true,
+  }) : _screensDir = '$baseScreensDir/${DateTime.now()}' {
+    if (!enabled) return;
+    Directory(_screensDir).createSync(recursive: true);
+  }
+
+  // ignore: unused_field
+  final dynamic _driver;
   final String _screensDir;
   final bool enabled;
   final bool withIndices;
   int _nextScreenId = 1;
 
-  Screenshoter(
-    this._driver,
-    String baseScreensDir, {
-    this.enabled: true,
-    this.withIndices: true,
-  }) : _screensDir = "$baseScreensDir/${DateTime.now()}" {
-    if (!enabled) return;
-    Directory(_screensDir).createSync(recursive: true);
-  }
-
   Future<void> saveScreen(String name) async {
     if (!enabled) return;
-    final bytes = await _driver.screenshot();
-    final namePrefix = withIndices ? "${_nextScreenId++}_" : "";
-    final path = "$_screensDir/$namePrefix$name.png";
-    File(path).writeAsBytesSync(bytes);
+    final namePrefix = withIndices ? '${_nextScreenId++}_' : '';
+    // ignore: unused_local_variable
+    final path = '$_screensDir/$namePrefix$name.png';
+    // _driver.takeScreenshot(path);
   }
 
   TestAction screenshot(String name) =>
-      TestAction(() => saveScreen(name), name: "take screenshot $name");
+      TestAction((_) => saveScreen(name), name: 'take screenshot $name');
 }

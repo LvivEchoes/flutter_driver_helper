@@ -1,9 +1,6 @@
-import 'package:flutter_driver/flutter_driver.dart';
-import 'package:flutter_driver_helper/flutter_driver_helper.dart';
+import 'package:flutter_driver_helper/flutter_driver_helper_legacy.dart';
 
 class MainScreen extends BaseScreen {
-  MainScreen(FlutterDriver driver) : super(driver);
-
   DWidget get app => dWidget('app');
 
   DWidget get field_1 => dWidget('field_1');
@@ -32,8 +29,6 @@ class MainScreen extends BaseScreen {
 }
 
 class SecondScreen extends BaseScreen {
-  SecondScreen(FlutterDriver driver) : super(driver);
-
   DWidget get list => dWidget("list");
 
   DScrollItem item(int index) => dScrollItem('item_$index', list);
