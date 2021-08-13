@@ -9,14 +9,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^0.1.2
+  cupertino_icons: ^1.0.2
 
 dev_dependencies:
+  integration_test:
+    sdk: flutter
   flutter_test:
     sdk: flutter
-  flutter_driver:
-    sdk: flutter
-  test: ^1.9.4
   flutter_driver_helper:
     path: ../
 

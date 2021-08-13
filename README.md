@@ -4,6 +4,11 @@
 
 Utility for easy work with flutter_driver in UI / integration tests
 
+# Update ~2.0.0
+
+Reconfigures package to use with integration_test. There's no way to be backwards
+compatible, so might just split this off to another project.
+
 ## [Article](https://habr.com/en/post/483468/) with description (Russian).
 
 # Advantages
